@@ -11,18 +11,22 @@ const CupboardCard = (props: {
 }): JSX.Element => {
   const [open, setOpen] = useState(false);
   let expired = false;
-  let expiresIn;
+  let expiredText;
+
+  // Check if ingredient is expired and exists in cupboard
   if (props.ingredient.expiration && props.ingredient.quantity !== 0) {
     expired = isPast(Date.parse(props.ingredient.expiration));
     if (!expired) {
-      expiresIn = (
+      // Expires in text
+      expiredText = (
         <div className={"text-xs opacity-40 font-bold text-left w-full pt-0.5"}>
           {"Expires in "}
           {formatDistanceToNow(Date.parse(props.ingredient.expiration))}.
         </div>
       );
     } else {
-      expiresIn = (
+      // Expired text
+      expiredText = (
         <div
           className={
             "text-xs text-red-700 opacity-70 font-bold text-left w-full pt-0.5"
@@ -35,17 +39,15 @@ const CupboardCard = (props: {
     }
   }
 
+  // If unit exists
   let unit;
-  if (
-    (props.ingredient.quantity || props.ingredient.quantity === 0) &&
-    props.ingredient.unit
-  ) {
-    unit = <div className={"text-sm"}>{props.ingredient.unit}</div>;
-  } else if (props.ingredient.unit) {
+  if (props.ingredient.unit) {
     unit = <div className={"text-sm"}>{props.ingredient.unit}</div>;
   } else {
     unit = <div className={"text-sm"}>unit(s)</div>;
   }
+
+  // Change colour of card, red if expired, orange if empty
   let containerClassName =
     "flex flex-col justify-center p-4 rounded-lg shadow-md w-full";
   if (expired) {
@@ -81,7 +83,7 @@ const CupboardCard = (props: {
               <div className={"flex text-2xl text-left w-full"}>
                 {props.ingredient.name}
               </div>
-              {expiresIn}
+              {expiredText}
             </div>
 
             <div

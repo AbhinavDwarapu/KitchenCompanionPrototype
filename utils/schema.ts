@@ -3,11 +3,6 @@ import { z } from "zod";
 export const CategoryTagSchema = z.object({
   id: z
     .string({
-      required_error: "Id is required.",
-    })
-    .uuid({ message: "Id is invalid." }),
-  name: z
-    .string({
       required_error: "Name is required.",
       invalid_type_error: "Name must be a string.",
     })
@@ -23,11 +18,8 @@ export const CategoryTagSchema = z.object({
       invalid_type_error: "Colour name must be a string.",
     })
     .min(3, { message: "Colour should be 2 or more characters in length." })
-    .max(10, { message: "Colour should be 24 or fewer characters in length." }),
-  reference: z
-    .string({ required_error: "References required." })
-    .length(36)
-    .array(),
+    .max(10, { message: "Colour should be 24 or fewer characters in length." })
+    .optional(),
 });
 
 export const IngredientSchema = z.object({
@@ -46,19 +38,18 @@ export const IngredientSchema = z.object({
   quantity: z
     .number({ invalid_type_error: "Quantity should be an integer." })
     .nonnegative({ message: "Quantity must be a positive number." })
-    .lte(99999, { message: "Quantity is too large." })
-    .optional(),
+    .lte(99999, { message: "Quantity is too large." }),
   unit: z
     .string()
     .max(32, {
       message: "Unit should be 32 or fewer characters in length.",
     })
     .optional(),
-  alias: z
-    .string()
-    .max(32, { message: "Alias should be 32 characters or shorter." })
-    .array()
-    .optional(),
+  // alias: z
+  //   .string()
+  //   .max(32, { message: "Alias should be 32 characters or shorter." })
+  //   .array()
+  //   .optional(),
   expiration: z
     .string()
     .max(16, { message: "Expiration should be 16 characters or shorter." })
@@ -72,7 +63,7 @@ export const IngredientSchema = z.object({
     .nonnegative({ message: "Quantity must be a positive number." })
     .lte(99999, { message: "Quantity is too large." })
     .optional(),
-  category: CategoryTagSchema,
+  category: CategoryTagSchema.optional(),
 });
 
 export const RecipeSchema = z.object({

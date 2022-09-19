@@ -1,8 +1,9 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-import { Category } from "../../../utils/types";
+import { Category } from "../../../../utils/types";
 import { IoMdCreate } from "react-icons/io";
-import { generateId, getAllObjectsFromDb } from "../../../utils/storage";
+import { getAllFromDb } from "../../../../utils/storage/localStore";
+import { generateId } from "../../../../utils/storage/data";
 
 const CategoriesDropdown = (props: {
   id: string;
@@ -17,9 +18,7 @@ const CategoriesDropdown = (props: {
 
   useEffect(() => {
     const getCategories = async () => {
-      const tempCategories = (await getAllObjectsFromDb(
-        "category"
-      )) as Category[];
+      const tempCategories = (await getAllFromDb("category")) as Category[];
       setCategoriesFromDb(tempCategories);
     };
     setLoading(true);
@@ -32,7 +31,7 @@ const CategoriesDropdown = (props: {
   let filteredCategories: Category[] = [];
   if (!loading) {
     filteredCategories = categoriesFromDb.filter((category) => {
-      return category.name
+      return category.id
         .toLowerCase()
         .trim()
         .includes(query.toLowerCase().trim());
@@ -43,16 +42,14 @@ const CategoriesDropdown = (props: {
   let exists = false;
   if (query.length > 0) {
     const newCategory: Category = {
-      id: generateId(),
-      name: (query.charAt(0).toUpperCase() + query.slice(1)).trim(),
+      id: (query.charAt(0).toUpperCase() + query.slice(1)).trim(),
       colour: "gray",
-      reference: [],
     };
     if (filteredCategories.length > 0) {
       for (let i = 0; i < filteredCategories.length; i++) {
         if (
-          filteredCategories[i].name.toLowerCase() ===
-          newCategory.name.toLowerCase()
+          filteredCategories[i].id.toLowerCase() ===
+          newCategory.id.toLowerCase()
         ) {
           exists = true;
           break;
@@ -70,7 +67,7 @@ const CategoriesDropdown = (props: {
   let dropdownCategories: JSX.Element[] = [];
 
   for (let i = 0; i < filteredCategories.length; i++) {
-    const colourClass = buttonClass(filteredCategories[i].colour);
+    const colourClass = "bg-gray-300 truncate p-2 m-2 rounded-md text-base";
 
     if (i == 0 && query.length > 0 && !exists) {
       dropdownCategories.push(
@@ -83,7 +80,7 @@ const CategoriesDropdown = (props: {
           type={"button"}
         >
           <IoMdCreate size={16} className={"flex mr-1 mt-1"} />
-          {filteredCategories[i].name}
+          {filteredCategories[i].id}
         </button>
       );
     } else {
@@ -96,7 +93,7 @@ const CategoriesDropdown = (props: {
           className={colourClass}
           type={"button"}
         >
-          {filteredCategories[i].name}
+          {filteredCategories[i].id}
         </button>
       );
     }

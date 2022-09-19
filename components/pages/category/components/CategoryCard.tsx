@@ -6,6 +6,7 @@ function CategoryCard(props: {
 }): JSX.Element {
   let containerColour = "";
 
+  // Choose colour
   if (props.category) {
     switch (props.category.colour) {
       case "red":
@@ -25,6 +26,23 @@ function CategoryCard(props: {
     containerColour += " bg-gray-200";
   }
 
+  // Remove delete button for Misc.
+  let deleteButton = (
+    <button
+      className={
+        "bg-red-600 text-red-100 text-white text-lg rounded-xl px-4 p-2 my-2 text-sm hover:bg-red-300 hover:text-black transition"
+      }
+      onClick={() => {
+        props.deleteCategory(props.category);
+      }}
+    >
+      Delete
+    </button>
+  );
+  if (props.category.id === "Misc.") {
+    deleteButton = <div></div>;
+  }
+
   return (
     <div
       className={
@@ -32,17 +50,8 @@ function CategoryCard(props: {
         containerColour
       }
     >
-      <div className={"px-2 py-3"}>{props.category.name}</div>
-      <button
-        className={
-          "bg-red-600 text-red-100 text-white text-lg rounded-xl px-4 p-2 my-2 text-sm hover:bg-red-300 hover:text-black transition"
-        }
-        onClick={() => {
-          props.deleteCategory(props.category);
-        }}
-      >
-        Delete
-      </button>
+      <div className={"px-2 py-3"}>{props.category.id}</div>
+      {deleteButton}
     </div>
   );
 }

@@ -1,24 +1,49 @@
 import { Category, Ingredient, Recipe } from "../../../../utils/types";
 import {
-  addObjectToDb,
-  getObjectByNameFromDb,
-  getObjectFromDb,
-} from "../../../../utils/storage";
+  addToDb,
+  getByNameFromDb,
+  getFromDb,
+} from "../../../../utils/storage/localStore";
 import React, { useEffect, useRef, useState } from "react";
-import TextAreaInput from "../../../forms/components/TextAreaInput";
-import TagsDropdown from "../../../forms/components/TagsDropdown";
-import TextInput from "../../../forms/components/TextInput";
-import NumberInput from "../../../forms/components/NumberInput";
-import IngredientsDropdown from "../../../forms/components/IngredientsDropdown";
+import TextAreaInput from "../../../forms/components/inputs/TextAreaInput";
+import TagsDropdown from "../../../forms/components/dropdowns/TagsDropdown";
+import TextInput from "../../../forms/components/inputs/TextInput";
+import NumberInput from "../../../forms/components/inputs/NumberInput";
+import IngredientsDropdown from "../../../forms/components/dropdowns/IngredientsDropdown";
 import toast, { Toaster } from "react-hot-toast";
 import { RecipeSchema } from "../../../../utils/schema";
 
 const RecipeModal = (props: {
   recipe: Recipe;
   handleDelete: (recipe: Recipe) => Promise<void>;
+  handleChange: (recipe: Recipe) => Promise<void>;
 }): JSX.Element => {
+  // Open states
+  const [openIngredients, setOpenIngredients] = useState(false);
+  const [openTags, setOpenTags] = useState(false);
+
+  // Local form states
+  const [recipeName, setRecipeName] = useState(props.recipe.name);
+  const [ingredients, setIngredients] = useState(
+    props.recipe.ingredients ? props.recipe.ingredients : []
+  );
+  const [time, setTime] = useState(props.recipe.time ? props.recipe.time : "");
+  const [tags, setTags] = useState(props.recipe.tags ? props.recipe.tags : []);
+  const [steps, setSteps] = useState(
+    props.recipe.steps ? props.recipe.steps : ""
+  );
+
+  // Title text ref
+  const textRef = useRef<any>();
+  useEffect(() => {
+    if (textRef.current) {
+      textRef.current.style.height = "30px";
+      textRef.current.style.height = `${textRef.current.scrollHeight}px`;
+    }
+  }, []);
+
   async function schemaValidate(tempRecipe: Recipe) {
-    const existingRecipe = (await getObjectByNameFromDb(
+    const existingRecipe = (await getByNameFromDb(
       tempRecipe.name,
       "recipe"
     )) as Recipe;
@@ -34,7 +59,9 @@ const RecipeModal = (props: {
 
     const message = RecipeSchema.safeParse(tempRecipe);
     if (message.success) {
-      await addObjectToDb(tempRecipe, "recipe").then(() => {});
+      // TODO: Broken function, handle change loops forever.
+      // await props.handleChange(tempRecipe);
+      await addToDb(tempRecipe, "recipe").then(() => {});
     } else {
       console.log(message.error.issues);
       toast.dismiss();
@@ -42,43 +69,6 @@ const RecipeModal = (props: {
       notify();
     }
   }
-  const [openIngredients, setOpenIngredients] = useState(false);
-  const [openTags, setOpenTags] = useState(false);
-
-  const [miscCategory, setMiscCategory] = useState<Category>({
-    colour: "",
-    id: "",
-    name: "",
-    reference: [],
-  });
-  const [loading, setLoading] = useState(true);
-
-  const [recipeName, setRecipeName] = useState(props.recipe.name);
-  const [ingredients, setIngredients] = useState(
-    props.recipe.ingredients ? props.recipe.ingredients : []
-  );
-  const [time, setTime] = useState(props.recipe.time ? props.recipe.time : "");
-  const [tags, setTags] = useState(props.recipe.tags ? props.recipe.tags : []);
-  const [steps, setSteps] = useState(
-    props.recipe.steps ? props.recipe.steps : ""
-  );
-
-  const textRef = useRef<any>();
-  useEffect(() => {
-    const getMisc = async () => {
-      setMiscCategory(
-        (await getObjectByNameFromDb("Misc.", "category")) as Category
-      );
-    };
-    setLoading(true);
-    getMisc().then(() => {
-      setLoading(false);
-    });
-    if (textRef.current) {
-      textRef.current.style.height = "30px";
-      textRef.current.style.height = `${textRef.current.scrollHeight}px`;
-    }
-  }, []);
 
   useEffect(() => {
     const tempRecipe = { ...props.recipe };
@@ -91,6 +81,7 @@ const RecipeModal = (props: {
     schemaValidate(tempRecipe);
   }, [ingredients, recipeName, steps, tags, time]);
 
+  // Recipe tags array
   let tagsArray;
   if (tags) {
     tagsArray = tags.map((tag) => {
@@ -108,18 +99,18 @@ const RecipeModal = (props: {
             "bg-gray-300 text-xs rounded-full p-2 shadow-md text-center m-1"
           }
         >
-          {tag.name}
+          {tag.id}
         </button>
       );
     });
   }
 
+  // Recipe ingredients
   let ingredientsArray;
-  if (ingredients && !loading) {
+  if (ingredients) {
     ingredientsArray = ingredients.map((ingredient) => {
       return (
         <IngredientComponent
-          category={miscCategory}
           key={ingredient.id}
           ingredient={ingredient}
           setIngredients={setIngredientsToState}
@@ -255,7 +246,6 @@ const RecipeModal = (props: {
 
 const IngredientComponent = (props: {
   ingredient: Ingredient;
-  category: Category;
   setIngredients: (ingredient: Ingredient) => void;
 }): JSX.Element => {
   const [cupboardIngredient, setCupboardIngredient] = useState<Ingredient>();
@@ -265,10 +255,11 @@ const IngredientComponent = (props: {
     props.ingredient.unit ? props.ingredient.unit : "unit(s)"
   );
 
+  // Get ingredient from db to compare quantities
   useEffect(() => {
     const getIngredient = async () => {
       setCupboardIngredient(
-        (await getObjectFromDb(props.ingredient.id, "ingredient")) as Ingredient
+        (await getFromDb(props.ingredient.id, "ingredient")) as Ingredient
       );
     };
 
@@ -278,7 +269,7 @@ const IngredientComponent = (props: {
       tempIngredient.name = ingredientName;
       tempIngredient.quantity = quantity;
       tempIngredient.unit = unit;
-      tempIngredient.category = props.category;
+      tempIngredient.category = { id: "Misc." };
       props.setIngredients(tempIngredient);
     });
   }, [quantity, ingredientName, unit]);

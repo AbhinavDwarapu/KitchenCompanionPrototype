@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, useScroll } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/router";
 import React from "react";
 

@@ -1,8 +1,9 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-import { Category, Tag } from "../../../utils/types";
+import { Category, Tag } from "../../../../utils/types";
 import { IoMdCreate } from "react-icons/io";
-import { generateId, getAllObjectsFromDb } from "../../../utils/storage";
+import { getAllFromDb } from "../../../../utils/storage/localStore";
+import { generateId } from "../../../../utils/storage/data";
 
 const TagsDropdown = (props: {
   id: string;
@@ -18,7 +19,7 @@ const TagsDropdown = (props: {
 
   useEffect(() => {
     const getTags = async () => {
-      const tempTags = (await getAllObjectsFromDb("tag")) as Tag[];
+      const tempTags = (await getAllFromDb("tag")) as Tag[];
       setTagsFromDb(tempTags);
     };
     setLoading(true);
@@ -31,7 +32,7 @@ const TagsDropdown = (props: {
   let filteredTags: Tag[] = [];
   if (!loading) {
     filteredTags = tagsFromDb.filter((tag, index) => {
-      return tag.name.toLowerCase().trim().includes(query.toLowerCase().trim());
+      return tag.id.toLowerCase().trim().includes(query.toLowerCase().trim());
     });
   }
 
@@ -39,14 +40,11 @@ const TagsDropdown = (props: {
   let exists = false;
   if (query.length > 0) {
     const newTag: Tag = {
-      id: generateId(),
-      name: (query.charAt(0).toUpperCase() + query.slice(1)).trim(),
-      colour: "gray",
-      reference: [],
+      id: (query.charAt(0).toUpperCase() + query.slice(1)).trim(),
     };
     if (filteredTags.length > 0) {
       for (let i = 0; i < filteredTags.length; i++) {
-        if (filteredTags[i].name.toLowerCase() === newTag.name.toLowerCase()) {
+        if (filteredTags[i].id.toLowerCase() === newTag.id.toLowerCase()) {
           exists = true;
           break;
         }
@@ -65,7 +63,8 @@ const TagsDropdown = (props: {
     if (props.tags.some(({ id }) => id === filteredTags[i].id)) {
       continue;
     }
-    const colourClass = buttonClass(filteredTags[i].colour);
+    const colourClass =
+      "bg-gray-300 truncate p-2 m-2 rounded-md text-base flex flex-row justify-content";
 
     if (i == 0 && query.length > 0 && !exists) {
       dropdownTags.push(
@@ -80,7 +79,7 @@ const TagsDropdown = (props: {
           type={"button"}
         >
           <IoMdCreate size={16} className={"flex mr-1 mt-1"} />
-          {filteredTags[i].name}
+          {filteredTags[i].id}
         </button>
       );
     } else {
@@ -95,7 +94,7 @@ const TagsDropdown = (props: {
           className={colourClass}
           type={"button"}
         >
-          {filteredTags[i].name}
+          {filteredTags[i].id}
         </button>
       );
     }

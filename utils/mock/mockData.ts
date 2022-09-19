@@ -1,100 +1,72 @@
 import { Category, Ingredient, Recipe, Tag } from "../types";
-import { addObjectToDb, clearDbs } from "../storage";
+import { addToDb, clearDbs } from "../storage/localStore";
 
 export async function initTempData() {
-  // await clearDbs();
+  await clearDbs();
 
   for (let i = 0; i < Categories.length; i += 1) {
-    await addObjectToDb(Categories[i], "category");
+    await addToDb(Categories[i], "category");
   }
-  // for (let i = 0; i < Tags.length; i += 1) {
-  //   await addObjectToDb(Tags[i], "tag");
-  // }
-  // for (let i = 0; i < Ingredients.length; i += 1) {
-  //   await addObjectToDb(Ingredients[i], "ingredient");
-  // }
-  // for (let i = 0; i < Recipes.length; i += 1) {
-  //   await addObjectToDb(Recipes[i], "recipe");
-  // }
+  for (let i = 0; i < Tags.length; i += 1) {
+    await addToDb(Tags[i], "tag");
+  }
+  for (let i = 0; i < Ingredients.length; i += 1) {
+    await addToDb(Ingredients[i], "ingredient");
+  }
+  for (let i = 0; i < Recipes.length; i += 1) {
+    await addToDb(Recipes[i], "recipe");
+  }
 }
 
 // 6 Entries
 export const Categories: Category[] = [
-  // {
-  //   id: "8639e2c5-455d-4f34-8b93-ab3425068780",
-  //   name: "Meats",
-  //   colour: "red",
-  //   reference: [],
-  // },
-  // {
-  //   id: "a12d7447-22ec-4291-91d4-4f39de7c0ba3",
-  //   name: "Drinks",
-  //   colour: "green",
-  //   reference: [],
-  // },
-  // {
-  //   id: "41ec5211-b227-4450-b001-6aeea5666c3a",
-  //   name: "Fruits",
-  //   colour: "green",
-  //   reference: [],
-  // },
-  // {
-  //   id: "dd46c649-e5a9-42a5-8aa8-583f513f2b40",
-  //   name: "Vegetables",
-  //   colour: "blue",
-  //   reference: [],
-  // },
   {
-    id: "3fb88781-22df-41a2-bf9b-87075acb666e",
-    name: "Misc.",
-    colour: "blue",
-    reference: [],
+    id: "Meats",
   },
-  // {
-  //   id: "32912e95-62a3-41db-8287-b17c1406e937",
-  //   name: "Spices",
-  //   colour: "red",
-  //   reference: [],
-  // },
+  {
+    id: "Drinks",
+    colour: "green",
+  },
+  {
+    id: "Fruits",
+    colour: "green",
+  },
+  {
+    id: "Vegetables",
+    colour: "blue",
+  },
+  {
+    id: "Misc.",
+  },
+  {
+    id: "Spices",
+    colour: "red",
+  },
 ];
 
 // 6 Entries
 export const Tags: Tag[] = [
   {
-    id: "bd0503b3-5d14-41f7-862d-f76d50b88a08",
-    name: "Vegan",
-    colour: "red",
-    reference: [],
+    id: "Vegan",
   },
   {
-    id: "cfa47715-441e-4439-b83e-2174f41a5cb1",
-    name: "Easy",
+    id: "Easy",
     colour: "blue",
-    reference: [],
   },
   {
-    id: "a32c58ff-ce3c-463c-be3f-3aa8ce4881d6",
-    name: "Quick",
-    colour: "gray",
-    reference: [],
+    id: "Quick",
   },
   {
-    id: "76a89eef-5e2f-45b1-b9d5-604b5ac73fd7",
-    name: "Week Days",
+    id: "Week Days",
     colour: "green",
-    reference: [],
   },
   {
-    id: "8605b434-bb77-4dba-be32-d5d9b61aedd3",
-    name: "To Share",
+    id: "To Share",
     colour: "red",
-    reference: [],
   },
   {
-    id: "176f4ce9-533f-4452-b1a6-f2415c7de1bf",
-    name: "Fancy",
+    id: "Fancy",
     colour: "blue",
-    reference: [],
   },
 ];
 
@@ -117,7 +89,7 @@ export const Ingredients: Ingredient[] = [
     name: "Potato",
     category: Categories[3],
     quantity: 12,
-    alias: ["potatoes", "pomme de terre"],
+    // alias: ["potatoes", "pomme de terre"],
     expiration: "2023-09-12",
     notes: "Check for discolouration before use!",
     cost: 12.23,
@@ -128,7 +100,7 @@ export const Ingredients: Ingredient[] = [
     category: Categories[4],
     quantity: 0,
     unit: "pizza",
-    alias: ["Pizza"],
+    // alias: ["Pizza"],
     expiration: "2023-10-09",
     cost: 2.3,
   },
@@ -138,7 +110,7 @@ export const Ingredients: Ingredient[] = [
     category: Categories[0],
     quantity: 4,
     unit: "pieces",
-    alias: ["Chicken", "Poultry"],
+    // alias: ["Chicken", "Poultry"],
     expiration: "2022-09-15",
     notes: "Defrost in fridge, check expiration!",
     cost: 4.5,
@@ -158,7 +130,7 @@ export const Ingredients: Ingredient[] = [
     name: "Cola Drink",
     category: Categories[1],
     quantity: 11,
-    alias: ["Soft Drink", "Pop", "Cola"],
+    // alias: ["Soft Drink", "Pop", "Cola"],
   },
   {
     id: "97718584-fcc6-47b6-a759-40d1280b10e2",
@@ -166,7 +138,7 @@ export const Ingredients: Ingredient[] = [
     category: Categories[5],
     quantity: 50,
     unit: "grams",
-    alias: ["Sodium Chloride", "NaCL"],
+    // alias: ["Sodium Chloride", "NaCL"],
     notes: "In spice cabinet",
     cost: 1.14,
   },

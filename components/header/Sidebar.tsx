@@ -20,15 +20,6 @@ function Sidebar(props: {
     }
   }, [router]);
 
-  let routes = [
-    "/home",
-    "/recipes",
-    "/cupboard",
-    "/categories",
-    "/new/recipe",
-    "/new/ingredient",
-  ];
-
   let home =
     "m-2 pl-2 h-12 align-middle text-xl text-center hover:bg-gray-50 rounded-md transition " +
     (router.pathname === "/" ? "bg-gray-50 text-black" : " text-gray-300");

@@ -1,33 +1,37 @@
 import { Recipe } from "../../../../utils/types";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { cupboardHasIngredients } from "../../../../utils/storage";
 import ModalContainer from "../../../forms/components/ModalContainer";
 import RecipeModal from "./RecipeModal";
+import { missingIngredients } from "../../../../utils/storage/data";
 
 const RecipeCard = (props: {
   recipe: Recipe;
   setRecipes: Dispatch<SetStateAction<Recipe[]>>;
   getRecipes: () => Promise<void>;
+  handleChange: (recipe: Recipe) => Promise<void>;
   handleDelete: (recipe: Recipe) => Promise<void>;
 }): JSX.Element => {
-  const [missingIngredients, setMissingIngredients] = useState(0);
+  const [missingIngredientsInRecipe, setMissingIngredientsInRecipe] =
+    useState(0);
   const [loading, setLoading] = useState(true);
   const [open, setOpened] = useState(false);
 
+  // Get missing ingredients and store in state
   useEffect(() => {
-    const getAsync = async () => {
-      const temp = await cupboardHasIngredients(props.recipe);
-      setMissingIngredients(temp);
+    const getMissingIngredients = async () => {
+      const temp = await missingIngredients(props.recipe);
+      setMissingIngredientsInRecipe(temp);
     };
     setLoading(true);
-    getAsync().then(() => {
+    getMissingIngredients().then(() => {
       setLoading(false);
     });
   }, [props.recipe]);
 
+  // Change card to red if missing ingredients
   let className;
   let missing;
-  if (missingIngredients === 0) {
+  if (missingIngredientsInRecipe === 0) {
     className = "p-4 rounded-3xl shadow-md bg-gray-200 aspect-square w-full";
   } else {
     className = "p-4 rounded-3xl shadow-md bg-red-200 aspect-square w-full";
@@ -37,14 +41,10 @@ const RecipeCard = (props: {
           "absolute bottom-0 opacity-70 font-bold text-red-700 text-xs"
         }
       >
-        Missing {missingIngredients} ingredient(s).
+        Missing {missingIngredientsInRecipe} ingredient(s).
       </div>
     );
   }
-
-  // function handleDelete() {
-  //   deleteObjectFromDb(props.recipe.id, "recipe").then((r) => setOpened(false));
-  // }
 
   if (loading) {
     return <div>loading...</div>;
@@ -84,6 +84,7 @@ const RecipeCard = (props: {
                 <RecipeModal
                   recipe={props.recipe}
                   handleDelete={props.handleDelete}
+                  handleChange={props.handleChange}
                 />
               }
             />

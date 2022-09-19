@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Ingredient, Recipe } from "../../utils/types";
 import {
-  addObjectToDb,
-  deleteObjectFromDb,
-  getAllObjectsFromDb,
+  addToDb,
+  deleteFromDb,
+  getAllFromDb,
   getIngredientsByCategory,
-} from "../../utils/storage";
+} from "../../utils/storage/localStore";
 import RecipeCard from "./recipes/components/RecipeCard";
 import CupboardCard from "./cupboard/components/CupboardCard";
 
@@ -22,8 +22,8 @@ function Index(): JSX.Element {
 
   useEffect(() => {
     const runAsync = async () => {
-      setRecipes((await getAllObjectsFromDb("recipe")) as Recipe[]);
-      setIngredients((await getAllObjectsFromDb("ingredient")) as Ingredient[]);
+      setRecipes((await getAllFromDb("recipe")) as Recipe[]);
+      setIngredients((await getAllFromDb("ingredient")) as Ingredient[]);
     };
     setLoading(true);
     runAsync().then(() => {
@@ -34,18 +34,18 @@ function Index(): JSX.Element {
   let recipeCards;
 
   const getRecipes = async () => {
-    setRecipes((await getAllObjectsFromDb("recipe")) as Recipe[]);
+    setRecipes((await getAllFromDb("recipe")) as Recipe[]);
   };
 
   async function handleDeleteRecipe(recipe: Recipe) {
-    await deleteObjectFromDb(recipe.id, "recipe").then(() => {
+    await deleteFromDb(recipe.id, "recipe").then(() => {
       const temp = [...recipes];
       temp.splice(recipes.indexOf(recipe), 1);
       setRecipes([...temp]);
     });
   }
   async function handleDeleteIngredient(ingredient: Ingredient) {
-    await deleteObjectFromDb(ingredient.id, "ingredient").then(() => {
+    await deleteFromDb(ingredient.id, "ingredient").then(() => {
       const temp = [...ingredients];
       temp.splice(ingredients.indexOf(ingredient), 1);
       setIngredients([...temp]);
@@ -63,7 +63,7 @@ function Index(): JSX.Element {
     setIngredients(temp);
     setSortedIngredients(getIngredientsByCategory(temp));
 
-    await addObjectToDb(ingredient, "ingredient").then(() => {});
+    await addToDb(ingredient, "ingredient").then(() => {});
   }
 
   recipeCards = recipes.map((recipe) => {

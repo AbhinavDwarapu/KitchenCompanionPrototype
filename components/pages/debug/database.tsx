@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Category, Ingredient, Recipe, Tag } from "../../../utils/types";
-import { getAllObjectsFromDb } from "../../../utils/storage";
-import { initTempData } from "../../../utils/mock/data";
+import { getAllFromDb } from "../../../utils/storage/localStore";
+import { initTempData } from "../../../utils/mock/mockData";
 
 function DatabasePage(): JSX.Element {
   const recipes = useRef<Recipe[]>([]);
@@ -14,14 +14,10 @@ function DatabasePage(): JSX.Element {
   useEffect(() => {
     const getStorage = async () => {
       await initTempData();
-      recipes.current = (await getAllObjectsFromDb("recipe")) as Recipe[];
-      ingredients.current = (await getAllObjectsFromDb(
-        "ingredient"
-      )) as Ingredient[];
-      categories.current = (await getAllObjectsFromDb(
-        "category"
-      )) as Category[];
-      tags.current = (await getAllObjectsFromDb("tag")) as Tag[];
+      recipes.current = (await getAllFromDb("recipe")) as Recipe[];
+      ingredients.current = (await getAllFromDb("ingredient")) as Ingredient[];
+      categories.current = (await getAllFromDb("category")) as Category[];
+      tags.current = (await getAllFromDb("tag")) as Tag[];
     };
     setLoading(true);
     getStorage().then(() => {

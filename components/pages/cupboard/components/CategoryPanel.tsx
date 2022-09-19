@@ -8,18 +8,18 @@ const CategoryPanel = (props: {
   handleChange: (ingredient: Ingredient) => Promise<void>;
 }): JSX.Element => {
   let cupboardCards;
-  if (props.ingredients) {
-    cupboardCards = props.ingredients.map((value, index) => {
-      return (
-        <CupboardCard
-          key={index}
-          ingredient={value}
-          handleDelete={props.handleDelete}
-          handleChange={props.handleChange}
-        />
-      );
-    });
-  }
+
+  // Array of cupboard cards in panel (category)
+  cupboardCards = props.ingredients.map((value, index) => {
+    return (
+      <CupboardCard
+        key={index}
+        ingredient={value}
+        handleDelete={props.handleDelete}
+        handleChange={props.handleChange}
+      />
+    );
+  });
 
   return (
     <div className={"my-1 p-4 rounded-lg"}>

@@ -21,12 +21,6 @@ const NavigationBar = (): JSX.Element => {
             <AiFillHome size={"26"} />
           </button>
         </Link>
-
-        {/*<Link href={"/lists"}>*/}
-        {/*  <button>*/}
-        {/*    <FaShoppingBasket size={"20"} />*/}
-        {/*  </button>*/}
-        {/*</Link>*/}
         <Link href={"/cupboard"}>
           <button>
             <RiFridgeFill size={"26"} />

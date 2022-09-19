@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
-import { Category, Ingredient } from "../../../utils/types";
+import { Ingredient } from "../../../utils/types";
 import {
-  addObjectToDb,
-  deleteObjectFromDb,
-  generateId,
-  getAllObjectsFromDb,
+  addToDb,
+  deleteFromDb,
+  getAllFromDb,
   getIngredientsByCategory,
-  getObjectByNameFromDb,
-  getOrderedCategoryKeys,
-} from "../../../utils/storage";
+} from "../../../utils/storage/localStore";
 import CategoryPanel from "./components/CategoryPanel";
+import {
+  generateId,
+  getOrderedCategoryKeys,
+} from "../../../utils/storage/data";
 
 function CupboardPage(): JSX.Element {
   const [loading, setLoading] = useState(true);
@@ -18,9 +19,10 @@ function CupboardPage(): JSX.Element {
     [p: string]: Ingredient[];
   }>({});
 
+  // Get all ingredients sorted ingredients from Db
   useEffect(() => {
     const getAndSortIngredients = async () => {
-      const tempIngredients = (await getAllObjectsFromDb(
+      const tempIngredients = (await getAllFromDb(
         "ingredient"
       )) as Ingredient[];
       setIngredients(tempIngredients);
@@ -32,53 +34,48 @@ function CupboardPage(): JSX.Element {
     });
   }, []);
 
+  // Delete ingredient from db and local state
   async function handleDelete(ingredient: Ingredient) {
-    await deleteObjectFromDb(ingredient.id, "ingredient").then(() => {
-      const temp = [...ingredients];
-      temp.splice(ingredients.indexOf(ingredient), 1);
-      setIngredients(temp);
-      setSortedIngredients(getIngredientsByCategory(temp));
-    });
-  }
-
-  async function handleChange(ingredient: Ingredient) {
     const temp = [...ingredients];
-
-    for (let i = 0; i < temp.length; i += 1) {
-      if (temp[i].id === ingredient.id) {
-        temp[i] = ingredient;
-      }
-    }
+    temp.splice(ingredients.indexOf(ingredient), 1);
     setIngredients(temp);
     setSortedIngredients(getIngredientsByCategory(temp));
-
-    await addObjectToDb(ingredient, "ingredient").then(() => {});
+    await deleteFromDb(ingredient.id, "ingredient");
   }
 
-  async function createIngredient() {
+  // Change ingredient from db and local state
+  async function handleChange(ingredient: Ingredient) {
     const tempIngredients = [...ingredients];
-    const tempCategory = (await getObjectByNameFromDb(
-      "Misc.",
-      "category"
-    )) as Category;
-    console.log();
+
+    for (let i = 0; i < tempIngredients.length; i += 1) {
+      if (tempIngredients[i].id === ingredient.id) {
+        tempIngredients[i] = ingredient;
+      }
+    }
+    setIngredients(tempIngredients);
+    setSortedIngredients(getIngredientsByCategory(tempIngredients));
+
+    await addToDb(ingredient, "ingredient");
+  }
+
+  // Create empty ingredient on new ingredient button, add to db and local state
+  async function createEmptyIngredient() {
+    const tempIngredients = [...ingredients];
 
     const tempIngredient: Ingredient = {
-      category: tempCategory,
+      category: { id: "Misc." },
       id: generateId(),
       name: "New Ingredient " + Math.floor(Math.random() * 10000).toString(),
       quantity: 0,
     };
-    console.log(tempIngredients);
     tempIngredients.unshift(tempIngredient);
     setIngredients(tempIngredients);
     setSortedIngredients(getIngredientsByCategory(tempIngredients));
 
-    const temp = await addObjectToDb(tempIngredient, "ingredient").then(
-      () => {}
-    );
+    await addToDb(tempIngredient, "ingredient");
   }
 
+  // Create category panels
   let combinedCategoryPanels: JSX.Element[] = [];
   if (loading) {
     return <div className={"m-8"}>loading...</div>;
@@ -100,15 +97,14 @@ function CupboardPage(): JSX.Element {
       <div className={"flex flex-col m-8 mb-32 sticky-width m-auto"}>
         <button
           className={
-            "p-2 rounded-lg shadow-lg bg-green-300 text-green-900 mx-4 mt-6 text-center"
+            "p-2 rounded-lg shadow-md bg-green-300 text-green-900 mx-4 mt-6 text-center"
           }
           onClick={() => {
-            createIngredient();
+            createEmptyIngredient();
           }}
         >
           New Ingredient?
         </button>
-
         {combinedCategoryPanels}
       </div>
     );

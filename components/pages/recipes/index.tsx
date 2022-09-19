@@ -1,19 +1,20 @@
 import { useEffect, useState } from "react";
 import { Recipe } from "../../../utils/types";
 import {
-  addObjectToDb,
-  deleteObjectFromDb,
-  generateId,
-  getAllObjectsFromDb,
-} from "../../../utils/storage";
+  addToDb,
+  deleteFromDb,
+  getAllFromDb,
+} from "../../../utils/storage/localStore";
 import RecipeCard from "./components/RecipeCard";
+import { generateId } from "../../../utils/storage/data";
 
 const RecipesIndex = (): JSX.Element => {
   const [loading, setLoading] = useState(true);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
 
+  // Get recipes from db and set to local state
   const getRecipes = async () => {
-    setRecipes((await getAllObjectsFromDb("recipe")) as Recipe[]);
+    setRecipes((await getAllFromDb("recipe")) as Recipe[]);
   };
   useEffect(() => {
     setLoading(true);
@@ -22,14 +23,28 @@ const RecipesIndex = (): JSX.Element => {
     });
   }, []);
 
+  // Delete recipe from db and state
   async function handleDelete(recipe: Recipe) {
-    await deleteObjectFromDb(recipe.id, "recipe").then(() => {
-      const temp = [...recipes];
-      temp.splice(recipes.indexOf(recipe), 1);
-      setRecipes([...temp]);
-    });
+    const temp = [...recipes];
+    temp.splice(recipes.indexOf(recipe), 1);
+    setRecipes([...temp]);
+    await deleteFromDb(recipe.id, "recipe");
   }
 
+  // Change recipe in db and state
+  // TODO: Broken function, handle change loops forever.
+  async function handleChange(recipe: Recipe) {
+    await addToDb(recipe, "recipe");
+    const tempRecipes = [...recipes];
+    for (let i = 0; i < tempRecipes.length; i += 1) {
+      if (tempRecipes[i].id === recipe.id) {
+        tempRecipes[i] = recipe;
+      }
+    }
+    setRecipes([...tempRecipes]);
+  }
+
+  // Create empty recipe, add to db and local state
   async function createRecipe() {
     const tempRecipes = [...recipes];
 
@@ -41,7 +56,7 @@ const RecipesIndex = (): JSX.Element => {
     tempRecipes.unshift(tempRecipe);
     setRecipes(tempRecipes);
 
-    await addObjectToDb(tempRecipe, "recipe").then(() => {});
+    await addToDb(tempRecipe, "recipe");
   }
 
   if (loading) {
@@ -57,6 +72,7 @@ const RecipesIndex = (): JSX.Element => {
                 recipe={recipe}
                 getRecipes={getRecipes}
                 setRecipes={setRecipes}
+                handleChange={handleChange}
                 handleDelete={handleDelete}
               />
             );

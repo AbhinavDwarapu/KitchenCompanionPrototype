@@ -1,46 +1,23 @@
 import { Ingredient } from "../../../../utils/types";
 import React, { useEffect, useRef, useState } from "react";
-import DateInput from "../../../forms/components/DateInput";
-import NumberInputGroup from "../../../forms/components/NumberInputGroup";
-import CostInput from "../../../forms/components/CostInput";
-import TextInput from "../../../forms/components/TextInput";
-import TextAreaInput from "../../../forms/components/TextAreaInput";
+import DateInput from "../../../forms/components/inputs/DateInput";
+import NumberInputGroup from "../../../forms/components/inputs/NumberInputGroup";
+import CostInput from "../../../forms/components/inputs/CostInput";
+import TextInput from "../../../forms/components/inputs/TextInput";
+import TextAreaInput from "../../../forms/components/inputs/TextAreaInput";
 import toast, { Toaster } from "react-hot-toast";
 import { IngredientSchema } from "../../../../utils/schema";
-import CategoriesDropdown from "../../../forms/components/CategoriesDropdown";
-import { getObjectByNameFromDb } from "../../../../utils/storage";
+import CategoriesDropdown from "../../../forms/components/dropdowns/CategoriesDropdown";
+import { getByNameFromDb } from "../../../../utils/storage/localStore";
 
 const IngredientModal = (props: {
   ingredient: Ingredient;
   handleDelete: (ingredient: Ingredient) => Promise<void>;
   handleChange: (ingredient: Ingredient) => Promise<void>;
 }): JSX.Element => {
-  async function schemaValidate(tempIngredient: Ingredient) {
-    const existingIngredient = await getObjectByNameFromDb(
-      tempIngredient.name,
-      "ingredient"
-    );
-
-    if (
-      typeof existingIngredient !== "undefined" &&
-      existingIngredient.id !== props.ingredient.id
-    ) {
-      const notify = () => toast("Name already exists!");
-      notify();
-      return;
-    }
-
-    const message = IngredientSchema.safeParse(tempIngredient);
-    if (message.success) {
-      await props.handleChange({ ...tempIngredient });
-    } else {
-      console.log(message.error.issues);
-      toast.dismiss();
-      const notify = () => toast(message.error.issues[0].message);
-      notify();
-    }
-  }
   const [openCategories, setOpenCategories] = useState(false);
+
+  // Form states
   const [ingredientName, setIngredientName] = useState(props.ingredient.name);
   const [quantity, setQuantity] = useState(props.ingredient.quantity);
   const [date, setDate] = useState(
@@ -55,9 +32,43 @@ const IngredientModal = (props: {
   const [units, setUnits] = useState(
     props.ingredient.unit === undefined ? "" : props.ingredient.unit
   );
-  const [category, setCategory] = useState(props.ingredient.category);
+  const [category, setCategory] = useState(
+    props.ingredient.category === undefined
+      ? { id: "Misc." }
+      : props.ingredient.category
+  );
+
+  // Name ref
   const textRef = useRef<any>();
 
+  // Validate schema
+  async function schemaValidate(tempIngredient: Ingredient) {
+    // Check if name already exists
+    const existingIngredient = (await getByNameFromDb(
+      tempIngredient.name,
+      "ingredient"
+    )) as Ingredient;
+    if (
+      typeof existingIngredient !== "undefined" &&
+      existingIngredient.id !== props.ingredient.id
+    ) {
+      const notify = () => toast("Name already exists!");
+      notify();
+      return;
+    }
+
+    // Zod validation, handle change if passed
+    const message = IngredientSchema.safeParse(tempIngredient);
+    if (message.success) {
+      await props.handleChange({ ...tempIngredient });
+    } else {
+      toast.dismiss();
+      const notify = () => toast(message.error.issues[0].message);
+      notify();
+    }
+  }
+
+  // Validate when current state changes
   useEffect(() => {
     if (textRef.current) {
       textRef.current.style.height = "30px";
@@ -101,7 +112,7 @@ const IngredientModal = (props: {
             setOpenCategories(!openCategories);
           }}
         >
-          {category.name}
+          {typeof category !== "undefined" ? category.id : "Misc."}
         </button>
         <CategoriesDropdown
           id={ingredientName}

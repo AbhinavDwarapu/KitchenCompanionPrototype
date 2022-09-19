@@ -1,13 +1,13 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-import { Category, Ingredient, Tag } from "../../../utils/types";
+import { Category, Ingredient, Tag } from "../../../../utils/types";
 import { IoMdCreate } from "react-icons/io";
 import {
-  generateId,
-  getAllObjectsFromDb,
-  getObjectByNameFromDb,
-  getObjectFromDb,
-} from "../../../utils/storage";
+  getAllFromDb,
+  getByNameFromDb,
+  getFromDb,
+} from "../../../../utils/storage/localStore";
+import { generateId } from "../../../../utils/storage/data";
 
 const IngredientsDropdown = (props: {
   id: string;
@@ -18,26 +18,15 @@ const IngredientsDropdown = (props: {
 }): JSX.Element => {
   const [query, setQuery] = useState("");
   const [ingredientsFromDb, setIngredientsFromDb] = useState<Ingredient[]>([]);
-  const [miscCategory, setMiscCategory] = useState<Category>({
-    colour: "",
-    id: "",
-    name: "",
-    reference: [],
-  });
 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getIngredients = async () => {
-      const tempIngredients = (await getAllObjectsFromDb(
+      const tempIngredients = (await getAllFromDb(
         "ingredient"
       )) as Ingredient[];
       setIngredientsFromDb(tempIngredients);
-      const tempCategory = (await getObjectByNameFromDb(
-        "Misc.",
-        "category"
-      )) as Category;
-      setMiscCategory(tempCategory);
     };
     setLoading(true);
     getIngredients().then(() => {
@@ -68,7 +57,7 @@ const IngredientsDropdown = (props: {
   let exists = false;
   if (query.length > 0) {
     const newIngredient: Ingredient = {
-      category: miscCategory,
+      category: { id: "Misc." },
       quantity: 1,
       id: generateId(),
       name: (query.charAt(0).toUpperCase() + query.slice(1)).trim(),
