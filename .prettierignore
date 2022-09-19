@@ -1,0 +1,5 @@
+# Ignore artifacts:
+out
+android
+.next
+node_modules
