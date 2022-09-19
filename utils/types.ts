@@ -1,31 +1,31 @@
-interface TypeIdName {
+// Use alias when search is implemented
+export interface Ingredient {
   id: string;
   name: string;
-}
-
-export interface Ingredient extends TypeIdName {
   quantity: number;
   unit?: string;
-  alias?: string[];
+  // alias?: string[];
   expiration?: string;
   notes?: string;
   cost?: number;
-  category: Category;
+  category?: Category;
 }
 
-export interface Recipe extends TypeIdName {
+export interface Recipe {
+  id: string;
+  name: string;
   ingredients?: Ingredient[];
   time?: string;
   tags?: Tag[];
   steps?: string;
 }
 
-export interface Category extends TypeIdName {
-  colour: string;
-  reference: string[];
+export interface Category {
+  id: string;
+  colour?: string;
 }
 
-export interface Tag extends TypeIdName {
-  colour: string;
-  reference: string[];
+export interface Tag {
+  id: string;
+  colour?: string;
 }
